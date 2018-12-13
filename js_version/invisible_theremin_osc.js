@@ -1,6 +1,3 @@
-// by Guillermo guillemontecinos
-// for the Invisible Theremin
-// based on ml5.js example
 // Copyright (c) 2018 ml5
 //
 // This software is released under the MIT License.
@@ -27,6 +24,14 @@ let dShoulders = 0;
 //dist variables sent to Max/Msp
 let distX = 0;
 let distY = 0;
+
+// Creating an OSC Web Socket Port object
+var oscPort = new osc.WebSocketPort({
+    url: "127.0.0.1", // URL to your Web Socket server.
+    metadata: true
+});
+// Opening osc port
+oscPort.open();
 
 function setup() {
   createCanvas(640, 480);
@@ -66,6 +71,7 @@ function draw() {
     getKeypoints();
     // We can call both functions to draw all keypoints and the skeletons
     drawKeypoints();
+    // calculate distance between shoulders and define framework from that
     dShoulders = dist(currentFrame[0].x, currentFrame[0].y, currentFrame[1].x, currentFrame[1].y);
     // console.log(dShoulders);
     // draw reference rect
@@ -77,6 +83,8 @@ function draw() {
     distX = abs(currentFrame[0].x - 1.5 * dShoulders - currentFrame[2].x);
     distY = abs(currentFrame[0].y + 1.5 * dShoulders - currentFrame[3].y);
     console.log("distX: " + distX + ", distY: " + distY);
+    // send osc message
+    sendOscMessage();
   }
 }
 
@@ -111,6 +119,22 @@ function drawKeypoints(){
   for (var i = 0; i < currentFrame.length; i++) {
     ellipse(currentFrame[i].x, currentFrame[i].y, 10, 10);
   }
+}
 
-  // console.log(currentFrame[0]);
+function sendOscMessage(){
+  oscPort.on("ready", function () {
+    oscPort.send({
+        address: "127.0.0.1",
+        args: [
+            {
+                type: "distx",
+                value: distX
+            },
+            {
+                type: "disty",
+                value: distY
+            }
+        ]
+    });
+});
 }
