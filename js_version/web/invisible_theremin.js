@@ -25,6 +25,7 @@ for (var i = 0; i < buffer.length; i++) {
 }
 var currentFrame = [[0,0],[0,0],[0,0],[0,0]]; //array used to calculate the time average position
 //on both buffer and currentFrame the entries will be 0: right shoulder (6), 1: left shoulder (5), 2: right wrist (10), 3: left wrist (9)
+let centerX = 0; //Center of the reference area
 let dShoulders = 0;
 let distRef = 0;
 //dist variables sent to Max/Msp
@@ -89,13 +90,14 @@ function draw() {
     noFill();
     strokeWeight(2);
     stroke(255,0,0);
-    rect(currentFrame[0].x, currentFrame[0].y, 3 * dShoulders, 3 * dShoulders);
+    centerX = (currentFrame[0].x + currentFrame[1].x) / 2;
+    rect(centerX, currentFrame[0].y, 3 * dShoulders, 3 * dShoulders);
     if (poses.length == 0) {
       distX = 0;
       distY = 0;
     }
     else {
-      distX = abs(currentFrame[0].x - distRef - currentFrame[2].x);
+      distX = abs(centerX - distRef - currentFrame[2].x);
       distY = abs(currentFrame[0].y + distRef - currentFrame[3].y);
     }
 
