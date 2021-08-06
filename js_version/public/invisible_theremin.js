@@ -32,17 +32,21 @@ let distRef = 0;
 let distX = 0;
 let distY = 0;
 
+const url = 'ws://' + location.host
+console.log(url)
+// Open a new ws connection with the server
+const socket = new WebSocket(url);
 
-var port = new osc.WebSocketPort({
-    url: "ws://localhost:8081"
-});
+// var port = new osc.WebSocketPort({
+//     url: "ws://localhost:8081"
+// });
 
-port.on("message", function (oscMessage) {
-    $("#message").text(JSON.stringify(oscMessage, undefined, 2));
-    console.log("message", oscMessage);
-});
+// port.on("message", function (oscMessage) {
+//     $("#message").text(JSON.stringify(oscMessage, undefined, 2));
+//     console.log("message", oscMessage);
+// });
 
-port.open();
+// port.open();
 
 function setup() {
   createCanvas(640, 480);
@@ -102,7 +106,13 @@ function draw() {
     }
 
     // console.log("distX: " + distX + ", distY: " + distY);
-    sendOsc();
+    // sendOsc();
+    if(distX && distY && distRef) {
+        sendMessage(JSON.stringify({address: '/distX', args: distX}));
+        sendMessage(JSON.stringify({address: '/distY', args: distY}));
+        sendMessage(JSON.stringify({address: '/distRef', args: distRef}))
+        // sendMessage(JSON.stringify({address: '/theremin', args: [distX, distY, distRef]}))
+    }
   }
 }
 
@@ -140,13 +150,15 @@ function drawKeypoints(){
   }
 }
 
-function sendOsc(arg1, arg2){
-  port.send({
-      address: "/theremin",
-      args: [distX, distY, distRef]
-  });
+function sendMessage(data){
+    if(socket.readyState === WebSocket.OPEN){
+        socket.send(data)
+    }
 }
 
-// function keyPressed(){
-//   sendOsc();
+// function sendOsc(arg1, arg2){
+//   port.send({
+//       address: "/theremin",
+//       args: [distX, distY, distRef]
+//   });
 // }
